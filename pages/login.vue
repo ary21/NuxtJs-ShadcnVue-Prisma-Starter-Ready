@@ -16,7 +16,8 @@ import {
 } from '@/components/ui/form'
 import { useAuth } from '~/composables/useAuth'
 
-// TODO : nuxt page handle kalau useAuth sudah 
+const { isAuthenticated } = useAuth()
+const router = useRouter()
 
 const { handleSubmit, isSubmitting } = useForm<LoginSchema>({
   validationSchema: toTypedSchema(loginSchema),
@@ -30,7 +31,7 @@ const onSubmit = handleSubmit(async (values) => {
     })
     if (res.token) {
       const { login } = useAuth()
-      login(res.token)
+      login(res.token, res.user.id)
 
       toast.success('Login berhasil, redirecting...')
       await navigateTo('/dashboard', { replace: true })
@@ -40,6 +41,12 @@ const onSubmit = handleSubmit(async (values) => {
   } catch (err) {
     console.error(err);
     toast.error('Email atau password salah')
+  }
+})
+
+onMounted(() => {
+  if (isAuthenticated.value) {
+    router.push('/dashboard')
   }
 })
 </script>

@@ -17,7 +17,39 @@ import {
   DropdownMenuContent,
   DropdownMenuItem
 } from "@/components/ui/dropdown-menu"
+import UserProfileDialog from '@/components/user/profile-dialog.vue'
 import { menuItems } from "~/common/constant";
+import { useAuth } from '~/composables/useAuth'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+const { logout } = useAuth()
+const loading = ref(false)
+const showProfileDialog = ref(false)
+
+function handleProfileClick() {
+  showProfileDialog.value = true
+}
+
+async function handleLogout() {
+  try {
+    loading.value = true
+    // Call logout API
+    await $fetch('/api/auth/logout', {
+      method: 'POST'
+    })
+    
+    // Use auth composable to clear state
+    logout()
+    
+    // Redirect to login
+    await router.push('/login')
+  } catch (error) {
+    console.error('Logout failed:', error)
+  } finally {
+    loading.value = false
+  }
+}
 
 // interface Props {
 //   modelValue?: boolean
@@ -87,16 +119,16 @@ const items = menuItems;
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <SidebarMenuButton>
-                <User2 /> Username
+                <User2 /> User Profile
                 <ChevronUp class="ml-auto" />
               </SidebarMenuButton>
             </DropdownMenuTrigger>
             <DropdownMenuContent side="top" class="w-[--reka-popper-anchor-width]">
-              <DropdownMenuItem>
-                <span>User Akun</span>
+              <DropdownMenuItem class="cursor-pointer" @click="handleProfileClick">
+                <span>Update Profile</span>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <span>Keluar</span>
+              <DropdownMenuItem class="cursor-pointer text-red-600 focus:text-red-600" :disabled="loading" @click="handleLogout">
+                <span>{{ loading ? 'Logging out...' : 'Logout' }}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -104,4 +136,8 @@ const items = menuItems;
       </SidebarMenu>
     </SidebarFooter>
   </Sidebar>
+  <UserProfileDialog 
+    :show="showProfileDialog" 
+    @close="showProfileDialog = false"
+  />
 </template>

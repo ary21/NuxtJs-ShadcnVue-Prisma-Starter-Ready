@@ -30,5 +30,12 @@ export default defineEventHandler(async (event) => {
     maxAge: 60 * 60 * 24 * 7,
   });
 
-  return { message: "Login successful", token };
+  return { 
+    message: "Login successful", 
+    token,
+    user: {
+      id: user.id,
+      name: user.name
+    }
+  }
 });
